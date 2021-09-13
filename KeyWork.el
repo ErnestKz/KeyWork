@@ -51,7 +51,7 @@
 (defun KeyWork--augmentation (symbol)
   "Check if the map associated with SYMBOL has any activatable augmentations.
 
-   Retruns a symbol that stores the activatable map, otherwise returns nil"
+   Returns a symbol that stores the activatable map, otherwise returns nil."
   (let (($a (get symbol ':modes))) ; find better name instead of :modes
     (KeyWork--augmentation-check $a)))
 
@@ -80,50 +80,68 @@
 
 (load-file "~/Files/SystemConfig/Emacs/ParserMonad.el")
 
-(defconst KeyWork--P-inline-lambda (Parser-fmap
-				    (lambda (x) `(lambda () (interactive),x))
-				    Parser-quoted-list-unwrap))
+(defconst KeyWork--P-inline-lambda
+  (Parser-fmap
+   (lambda (x) `(lambda () (interactive),x))
+   Parser-quoted-list-unwrap)
+  "Docstring")
 
-(defconst KeyWork--P-: (monad-do Parser
-			 (_ (Parser-equal ':)) 
-			 (x KeyWork--P-anonmap)
-			 (return x)))
+(defconst KeyWork--P-:
+  (monad-do Parser
+    (_ (Parser-equal ':)) 
+    (x KeyWork--P-anonmap)
+    (return x))
+  "Docstring")
 
+(defconst KeyWork--P-!l
+  (monad-do Parser
+    (_ (Parser-equal '!))
+    (x KeyWork--P-anonmap)
+    (return `(lambda () (interactive) (KeyWork-on ,x))))
+  "Docstring")
 
-(defconst KeyWork--P-!l (monad-do Parser
-			  (_ (Parser-equal '!))
-			  (x KeyWork--P-anonmap)
-			  (return `(lambda () (interactive) (KeyWork-on ,x)))))
+(defconst KeyWork--P-colour
+  Parser-string
+  "Docstring")
 
-(defconst KeyWork--P-colour Parser-string)
+(defconst KeyWork--P-style
+  Parser-symbol
+  "Docstring")
 
-(defconst KeyWork--P-style Parser-symbol)
+(defun KeyWork--P-symbol-prefix (prefix)
+  "Docstring goes here"
+  (monad-do Parser
+    (s Parser-symbol)
+    (if (and (not (equal (intern prefix) s))
+	     (equal prefix (substring (symbol-name s) 0 1)))
+	(Parser-return (intern (substring (symbol-name s) 1)))
+      Parser-zero)))
 
-(defun KeyWork--P-symbol-prefix (prefix) (monad-do Parser
-					   (s Parser-symbol)
-					   (if (and (not (equal (intern prefix) s)) (equal prefix (substring (symbol-name s) 0 1)))
-					       (Parser-return (intern (substring (symbol-name s) 1)))
-					     Parser-zero)))
+(defconst KeyWork--P-!s
+  (monad-do Parser
+    (x (KeyWork--P-symbol-prefix "!"))
+    (return `(lambda () (interactive) (KeyWork-on (quote ,x)))))
+  "Docstring goes here")
 
-(defconst KeyWork--P-!s (monad-do Parser
-			  (x (KeyWork--P-symbol-prefix "!"))
-			  (return `(lambda () (interactive) (KeyWork-on (quote ,x))))))
+(defun KeyWork--P-appearance (symbol)
+  "Docstring goes here"
+  (Parser-many
+   (Parser-plus-n
+    (Parser-fmap (lambda (x) `(put ,symbol ':colour ,x)) KeyWork--P-colour)
+    (Parser-fmap (lambda (x) `(put ,symbol ':style (quote ,x))) KeyWork--P-style))))
 
-
-(defun KeyWork--P-appearance (symbol) (Parser-many
-				       (Parser-plus-n
-					(Parser-fmap (lambda (x) `(put ,symbol ':colour ,x)) KeyWork--P-colour)
-					(Parser-fmap (lambda (x) `(put ,symbol ':style (quote ,x))) KeyWork--P-style))))
-
-(defun KeyWork--P-bindings (keymap) (monad-do Parser
-				      (x (Parser-many (Parser-nest
-						       (monad-do Parser
-							 (key Parser-string)
-							 (command KeyWork--P-binding-rhs)
-							 (return `(define-key ,keymap (kbd ,key) ,command))))))
-				      (return x)))
+(defun KeyWork--P-bindings (keymap)
+  "Docstring goes here"
+  (monad-do Parser
+    (x (Parser-many (Parser-nest
+		     (monad-do Parser
+		       (key Parser-string)
+		       (command KeyWork--P-binding-rhs)
+		       (return `(define-key ,keymap (kbd ,key) ,command))))))
+    (return x)))
 
 (defun KeyWork--P-predicate-to-mode-list (parent-map)
+  "Docstring goes here"
   (Parser-many (Parser-nest
 		(monad-do Parser
 		  (pred (Parser-plus
@@ -132,41 +150,37 @@
 		  (map Parser-quoted-symbol-unwrap)
 		  (return `(push ,`(cons ,pred (quote ,map)) (get ,parent-map :modes) ))))))
 
+(defconst KeyWork--P-binding-rhs
+  (monad-do Parser
+    (x (Parser-plus-n
+	KeyWork--P-:                               
+	KeyWork--P-!s                              
+	KeyWork--P-!l                              
+	Parser-quoted-symbol                      
+	(Parser-fmap 'eval Parser-unquoted-list)  
+	KeyWork--P-inline-lambda))
+    (return x))
+  "Docstring goes here")
 
+(defconst KeyWork--P-map
+  (monad-do Parser
+    (n (Parser-oneornone Parser-quoted-symbol))
+    (s (KeyWork--P-appearance 'map-symbol))
+    (b (KeyWork--P-bindings '(eval map-symbol)))
+    (m (KeyWork--P-predicate-to-mode-list 'map-symbol))
+    (return `(let ((map-symbol ,(if n n '(KeyWork--gensymbol))))
+	       (set map-symbol (make-sparse-keymap))
+	       ,@b
+ 	       ,@s
+	       ,@m
+	       (fset map-symbol (eval map-symbol))
+	       map-symbol)))
+  "Docstring goes here")
 
-(defconst KeyWork--P-binding-rhs (monad-do Parser
-				   (x (Parser-plus-n
-				       KeyWork--P-:                               ;; If : is encountered then its an inline map definition
-				       KeyWork--P-!s                              ;; Take off the ! prefix on the symbol and activate it as a map ;; this needs to go before 
-				       KeyWork--P-!l                              ;; Create map anon map and activate
-				       Parser-quoted-symbol                      ;; Either just an interactive command or keymap
-				       (Parser-fmap 'eval Parser-unquoted-list)  ;; Unquoted list which we just evauluate
-				       KeyWork--P-inline-lambda))
-				   (return x)))
+(defconst KeyWork--P-anonmap
+  (Parser-nest KeyWork--P-map)
+  "Docstring goes here")
 
-(defconst KeyWork--P-map (monad-do Parser
-			   (n Parser-quoted-symbol-unwrap)
-			   (s (KeyWork--P-appearance `(quote ,n)))
-			   (b (KeyWork--P-bindings n))
-			   (m (KeyWork--P-predicate-to-mode-list `(quote ,n)))
-			   (return `(progn (setq ,n (make-sparse-keymap))
-					   ,@b
-					   ,@s
-					   ,@m
-					   ,n))))
-
-(defconst KeyWork--P-anonmap (Parser-nest (monad-do Parser
-				     (n (Parser-oneornone Parser-quoted-symbol))
-				     (s (KeyWork--P-appearance 'map-symbol))
-				     (b (KeyWork--P-bindings '(eval map-symbol)))
-				     (m (KeyWork--P-predicate-to-mode-list 'map-symbol))
-				     (return `(let ((map-symbol ,(if n n '(KeyWork--gensymbol))))
-						(set map-symbol (make-sparse-keymap))
-						,@b
- 						,@s
-						,@m
-						(fset map-symbol (eval map-symbol))
-						map-symbol)))))
 ;; -----------------
 ;; User Interface
 
