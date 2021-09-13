@@ -121,3 +121,31 @@
  ("j" backward-char))
 
 
+
+
+;; (KeyWork d
+;; 	 "#ffffff" hollow
+;; 	 (a b c)
+;; 	 ("i" previous-line)
+;; 	 ("k" next-line)
+;; 	 ("l" forward-char)
+;; 	 ("j" (message "printing j"))
+;; 	 ((string-equal major-mode "pdf-view-mode") pdf-map)
+;; 	 ((string-equal major-mode "python-mode") KW-python)
+;; 	 ((string-equal major-mode "org-mode") KW-org))
+
+;; (KeyWork 'a
+;; 	 ;; "#ffffff" hollow
+;; 	 ("a" '(message "printing a ")))
+
+;; (KeyWork 'b
+;; 	 "#ffffff" hollow
+;; 	 ("b" '(message "printing b ")))
+
+;; (KeyWork 'c
+;; 	 "#ffffff" hollow
+;; 	 ("c" '(message "printing c ")))
+
+;; (KeyWork-on 'd)
+;; (KeyWork-on 'KW-command)
+

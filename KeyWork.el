@@ -1,7 +1,6 @@
-;;; KeyWork.el --- Description -*- lexical-binding: t -*-
+;;; KeyWork.el --- A modal keybinding DSL. -*- lexical-binding: t -*-
 
 ;;; Commentary:
-;; Comentary goes here.
 
 ;;; Code:
 (defvar KeyWork--map (make-sparse-keymap)
@@ -70,7 +69,7 @@
 	  (KeyWork--augmentation-check (cdr l)))))))
 
 (defun KeyWork--activate (symbol)
-  "SYMBOL."
+  "Set the map stored in SYMBOL as the current KeyWork minor mode map."
   (setq-default cursor-type (get symbol ':style)) ; need to make sure they do have a style and colour.
   (set-cursor-color (get symbol ':colour))
   (setf (cdr (assq 'KeyWork-mode minor-mode-map-alist)) (eval symbol)))
@@ -80,58 +79,31 @@
 
 (load-file "~/Files/SystemConfig/Emacs/ParserMonad.el")
 
-(defconst KeyWork--P-inline-lambda
-  (Parser-fmap
-   (lambda (x) `(lambda () (interactive),x))
-   Parser-quoted-list-unwrap)
-  "Docstring")
-
-(defconst KeyWork--P-:
-  (monad-do Parser
-    (_ (Parser-equal ':)) 
-    (x KeyWork--P-anonmap)
-    (return x))
-  "Docstring")
-
-(defconst KeyWork--P-!l
-  (monad-do Parser
-    (_ (Parser-equal '!))
-    (x KeyWork--P-anonmap)
-    (return `(lambda () (interactive) (KeyWork-on ,x))))
-  "Docstring")
-
-(defconst KeyWork--P-colour
-  Parser-string
-  "Docstring")
-
-(defconst KeyWork--P-style
-  Parser-symbol
-  "Docstring")
-
-(defun KeyWork--P-symbol-prefix (prefix)
-  "Docstring goes here"
-  (monad-do Parser
-    (s Parser-symbol)
-    (if (and (not (equal (intern prefix) s))
-	     (equal prefix (substring (symbol-name s) 0 1)))
-	(Parser-return (intern (substring (symbol-name s) 1)))
-      Parser-zero)))
-
-(defconst KeyWork--P-!s
-  (monad-do Parser
-    (x (KeyWork--P-symbol-prefix "!"))
-    (return `(lambda () (interactive) (KeyWork-on (quote ,x)))))
-  "Docstring goes here")
-
-(defun KeyWork--P-appearance (symbol)
-  "Docstring goes here"
+(defun KeyWork--P-appearance (m)
+  "Parses :colour <string> :style <symbol>"
   (Parser-many
    (Parser-plus-n
-    (Parser-fmap (lambda (x) `(put ,symbol ':colour ,x)) KeyWork--P-colour)
-    (Parser-fmap (lambda (x) `(put ,symbol ':style (quote ,x))) KeyWork--P-style))))
+    (Parser-fmap (lambda (x) `(put ,m ':colour ,x)) Parser-string)
+    (Parser-fmap (lambda (x) `(put ,m ':style (quote ,x))) Parser-symbol))))
+
+(defun KeyWork--P-composed-keymaps (m)
+  "Takes map M and matches a list of symbols i.e '(<SYMBOL> <SYMBOL> ...)' which are also maps.
+
+    The list of symbols and M are combined with make-composed-map."
+  (Parser-oneornone
+   (monad-do Parser
+     (maps (Parser-nest (Parser-many1 Parser-symbol)))
+     (return `((set ,m (make-composed-keymap (list (eval ,m) ,@maps))))))))
 
 (defun KeyWork--P-bindings (keymap)
-  "Docstring goes here"
+  "Parses multiple key bindings.
+    
+      '(STRING RHS)
+       (STRING RHS)
+       (STRING RHS)
+       .
+       .
+       .'"
   (monad-do Parser
     (x (Parser-many (Parser-nest
 		     (monad-do Parser
@@ -141,84 +113,92 @@
     (return x)))
 
 (defun KeyWork--P-predicate-to-mode-list (parent-map)
-  "Docstring goes here"
+  "Matches many '<LIST or SYMBOL> <SYMBOL>'
+
+    The match on the LHS is either a KeyWork--P-lambda-command or a Symbol this LHS is used
+    to as a function that returns a boolean.
+
+    The RHS <SYMBOL> is a symbol that contains a map."
   (Parser-many (Parser-nest
 		(monad-do Parser
 		  (pred (Parser-plus
-			 Parser-quoted-symbol
-			 KeyWork--P-inline-lambda))
-		  (map Parser-quoted-symbol-unwrap)
-		  (return `(push ,`(cons ,pred (quote ,map)) (get ,parent-map :modes) ))))))
-
-(defconst KeyWork--P-binding-rhs
-  (monad-do Parser
-    (x (Parser-plus-n
-	KeyWork--P-:                               
-	KeyWork--P-!s                              
-	KeyWork--P-!l                              
-	Parser-quoted-symbol                      
-	(Parser-fmap 'eval Parser-unquoted-list)  
-	KeyWork--P-inline-lambda))
-    (return x))
-  "Docstring goes here")
-
-
-(defun KeyWork--P-composed-keymaps (m)
-  (Parser-oneornone
-   (monad-do Parser
-     (maps (Parser-nest (Parser-many1 Parser-symbol)))
-     (return `((set ,m (make-composed-keymap (list (eval ,m) ,@maps))))))))
+			 (Parser-fmap 'custom-quote Parser-symbol)
+			 KeyWork--P-lambda-command))
+		  (map Parser-symbol)
+		  (return `(push ,`(cons ,pred (quote ,map)) (get ,parent-map :modes)))))))
 
 (defconst KeyWork--P-map
   (monad-do Parser
-    (n (Parser-oneornone Parser-quoted-symbol))
+    (n (Parser-oneornone Parser-symbol))
     (s (KeyWork--P-appearance 'map-symbol))
     (c (KeyWork--P-composed-keymaps 'map-symbol))
     (b (KeyWork--P-bindings '(eval map-symbol)))
     (m (KeyWork--P-predicate-to-mode-list 'map-symbol))
-    (return `(let ((map-symbol ,(if n n '(KeyWork--gensymbol))))
+    (return `(let ((map-symbol ,(if n `(quote ,n) '(KeyWork--gensymbol))))
 	       (set map-symbol (make-sparse-keymap))
 	       ,@b
  	       ,@s
-	       ,@m
+ 	       ,@m
 	       ,@c			
 	       (fset map-symbol (eval map-symbol))
 	       map-symbol)))
-  "Docstring goes here")
+  "Parser that matches a map structure and generates the elisp code that constructs the map".)
 
-(defconst KeyWork--P-anonmap
-  (Parser-nest KeyWork--P-map)
-  "Docstring goes here")
+(defconst KeyWork--P-lambda-command
+  (Parser-fmap (lambda (x) `(lambda () (interactive) ,x)) Parser-list)
+  "Matches a list, and wraps it into an interactive lambda.
+     For example:
+                                       (message \"hello\")
+     will be shorthand for:
+                                       (lambda () (interactive) (message \"hello\"))")
+(defconst KeyWork--P-prefix-key-map-declaration
+  (Parser-blind (Parser-equal ':) (Parser-nest KeyWork--P-map))
+  "Matches the list: ' : (<map>) ', and returns a parsed <map> via KeyWork--P-map.
+     For example:
+                                              :((\"a\" (message \"a\"))
+                                                (\"b\" (message \"b\")))
+     will be shorthand for:
+                                       (KeyWork (\"a\" (message \"a\"))
+                                                (\"b\" (message \"b\")))")
+(defconst KeyWork--P-stored-map-activation
+  (monad-do Parser
+    (x (KeyWork--P-symbol-prefix "!"))
+    (return `(lambda () (interactive) (KeyWork-on (quote ,x)))))
+  "Matches a symbol which starts with an !.
+   Returns an interactive command that calls KeyWork-on on the parsed symbol without the !.
+     For example:
+                                               '!my-map'
+     will be shorthand for:
+                               '(lambda () (interactive) (KeyWork-on my-map))'")
+(defconst KeyWork--P-inline-map-activation
+  (monad-do Parser
+    ((Parser-equal '!))
+    (x (Parser-nest KeyWork--P-map))
+    (return `(lambda () (interactive) (KeyWork-on ,x))))
+  "Matches the list: ' ! (<map>) '.
+   Retruns an interactive command that calls KeyWork-on on the parsed <map> via KeyWork--P-map.
+     For example:
+                                              !((\"a\" (message \"a\"))
+                                                (\"b\" (message \"b\")))
+     will be shorthand for:
+         (lambda () (interactive) (KeyWork-on (KeyWork (\"a\" (message \"a\"))
+                                                (\"b\" (message \"b\")))))")
+(defconst KeyWork--P-binding-rhs
+  (monad-do Parser
+    (x (Parser-plus-n
+	KeyWork--P-lambda-command
+	KeyWork--P-stored-map-activation
+	KeyWork--P-prefix-key-map-declaration
+	KeyWork--P-inline-map-activation
+	(Parser-fmap 'custom-quote Parser-symbol)))
+    (return x))
+  "Structures that can go on the right hand side of a bind.")
 
 ;; -----------------
 ;; User Interface
-
 (defmacro KeyWork (&rest a)
-  "KeyWork map declaration A."
+  "KeyWork map declaration A"
   (cadr (Parser-run KeyWork--P-map a)))
 
 (provide 'KeyWork)
 ;;; KeyWork.el ends here
-
-;; (KeyWork 'd
-;; 	 (a b c)
-;; 	 "#ffffff" hollow
-;; 	 ("i" 'previous-line)
-;; 	 ("k" 'next-line)
-;; 	 ("l" 'forward-char)
-;; 	 ("j" 'backward-char))
-
-;; (KeyWork 'a
-;; 	 ;; "#ffffff" hollow
-;; 	 ("a" '(message "printing a ")))
-
-;; (KeyWork 'b
-;; 	 "#ffffff" hollow
-;; 	 ("b" '(message "printing b ")))
-
-;; (KeyWork 'c
-;; 	 "#ffffff" hollow
-;; 	 ("c" '(message "printing c ")))
-
-;; (KeyWork-on 'd)
-;; (KeyWork-on 'KW-command)
