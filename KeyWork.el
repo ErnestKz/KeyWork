@@ -162,10 +162,18 @@
     (return x))
   "Docstring goes here")
 
+
+(defun KeyWork--P-composed-keymaps (m)
+  (Parser-oneornone
+   (monad-do Parser
+     (maps (Parser-nest (Parser-many1 Parser-symbol)))
+     (return `((set ,m (make-composed-keymap (list (eval ,m) ,@maps))))))))
+
 (defconst KeyWork--P-map
   (monad-do Parser
     (n (Parser-oneornone Parser-quoted-symbol))
     (s (KeyWork--P-appearance 'map-symbol))
+    (c (KeyWork--P-composed-keymaps 'map-symbol))
     (b (KeyWork--P-bindings '(eval map-symbol)))
     (m (KeyWork--P-predicate-to-mode-list 'map-symbol))
     (return `(let ((map-symbol ,(if n n '(KeyWork--gensymbol))))
@@ -173,6 +181,7 @@
 	       ,@b
  	       ,@s
 	       ,@m
+	       ,@c			
 	       (fset map-symbol (eval map-symbol))
 	       map-symbol)))
   "Docstring goes here")
@@ -191,9 +200,25 @@
 (provide 'KeyWork)
 ;;; KeyWork.el ends here
 
-;; (KeyWork 'KW-command
+;; (KeyWork 'd
+;; 	 (a b c)
 ;; 	 "#ffffff" hollow
 ;; 	 ("i" 'previous-line)
 ;; 	 ("k" 'next-line)
 ;; 	 ("l" 'forward-char)
 ;; 	 ("j" 'backward-char))
+
+;; (KeyWork 'a
+;; 	 ;; "#ffffff" hollow
+;; 	 ("a" '(message "printing a ")))
+
+;; (KeyWork 'b
+;; 	 "#ffffff" hollow
+;; 	 ("b" '(message "printing b ")))
+
+;; (KeyWork 'c
+;; 	 "#ffffff" hollow
+;; 	 ("c" '(message "printing c ")))
+
+;; (KeyWork-on 'd)
+;; (KeyWork-on 'KW-command)

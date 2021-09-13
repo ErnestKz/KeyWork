@@ -89,7 +89,24 @@
  ("i" previous-line)
  ("k" next-line)
  ("l" forward-char)
- ("j" backward-char))
+ ("j" backward-char)
+ :Augmentations
+ ((string-equal major-mode "python-mode") KW-python)
+ ((string-equal major-mode "org-mode") KW-org))
+
+
+(KeyWork
+ :Name Map-Name4
+ :Cursor hollow "#ffffff"
+ :Inherit (Map-Name Map-Name2)
+ :Bindings
+ ("i" previous-line)
+ ("k" next-line)
+ ("l" forward-char)
+ ("j" backward-char)
+ :Augmentations
+ ((string-equal major-mode "python-mode") :((KW-command KW-Python)))
+ ((string-equal major-mode "org-mode") KW-org))
 
 
 (KeyWork
