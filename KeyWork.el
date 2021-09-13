@@ -79,6 +79,15 @@
 
 (load-file "~/Files/SystemConfig/Emacs/ParserMonad.el")
 
+(defun KeyWork--P-symbol-prefix (prefix)
+  "Docstring goes here"
+  (monad-do Parser
+    (s Parser-symbol)
+    (if (and (not (equal (intern prefix) s))
+	     (equal prefix (substring (symbol-name s) 0 1)))
+	(Parser-return (intern (substring (symbol-name s) 1)))
+      Parser-zero)))
+
 (defun KeyWork--P-appearance (m)
   "Parses :colour <string> :style <symbol>"
   (Parser-many
@@ -142,7 +151,7 @@
 	       ,@c			
 	       (fset map-symbol (eval map-symbol))
 	       map-symbol)))
-  "Parser that matches a map structure and generates the elisp code that constructs the map".)
+  "Parser that matches a map structure and generates the elisp code that constructs the map.")
 
 (defconst KeyWork--P-lambda-command
   (Parser-fmap (lambda (x) `(lambda () (interactive) ,x)) Parser-list)
