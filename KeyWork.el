@@ -1,8 +1,35 @@
 ;;; KeyWork.el --- A modal keybinding DSL. -*- lexical-binding: t -*-
 
+;; Copyright (C) 2021  Ernests Kuznecovs
+
+;; Author: Ernests Kuznecovs <ernestkuznecovs@gmail.com>
+;; Keywords: extensions
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 ;;; Commentary:
 
 ;;; Code:
+(require 'ParserMonad)
+;; (use-package ParserMonad
+;;   :straight
+;;   (ParserMonad
+;;    :type git
+;;    :host github
+;;    :repo "ernestkz/ParserMonad.el"))
+
 (defvar KeyWork--map (make-sparse-keymap)
   "Initial map of KeyWork.")
 
@@ -77,7 +104,8 @@
 ;; --------
 ;; Parsing.
 
-(load-file "~/Files/SystemConfig/Emacs/ParserMonad.el")
+
+
 
 (defun KeyWork--P-symbol-prefix (prefix)
   "Docstring goes here"
@@ -183,9 +211,12 @@
   (monad-do Parser
     ((Parser-equal '!))
     (x (Parser-nest KeyWork--P-map))
-    (return `(lambda () (interactive) (KeyWork-on ,x))))
+    (let ((map-symbol (eval x)))
+      (return `(lambda () (interactive) (KeyWork-on (quote ,map-symbol))))))
+
+  
   "Matches the list: ' ! (<map>) '.
-   Retruns an interactive command that calls KeyWork-on on the parsed <map> via KeyWork--P-map.
+   Returns an interactive command that calls KeyWork-on on the parsed <map> via KeyWork--P-map.
      For example:
                                               !((\"a\" (message \"a\"))
                                                 (\"b\" (message \"b\")))
