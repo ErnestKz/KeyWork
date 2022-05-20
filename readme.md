@@ -83,9 +83,8 @@
 	  
 	  
 (setq KeyWork-mode t)
-(KeyWork-on 'navigation-map)
+(KeyWork-on 'KW-command)
 (add-hook 'minibuffer-setup-hook (lambda () (KeyWork-on 'KW-command)))
 (add-hook 'minibuffer-exit-hook (lambda () (KeyWork-on 'KW-insert)))
-	  
 ```
 

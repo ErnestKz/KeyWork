@@ -22,7 +22,7 @@
 
 ;;; Commentary:
 
-;;; 🗝️👷🏼‍♂️ - Elisp DSL for declaring modal bindings in Emacs.
+
 
 ;;; Code:
 (require 'ParserMonad)
