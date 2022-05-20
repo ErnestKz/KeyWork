@@ -99,8 +99,8 @@ Below is an excerpt from a [config](https://github.com/ErnestKz/SystemConfig/blo
 		         ("l" helpful-variable)))
 	  
 	      ("w" :(("m" (find-file "~/.emacs"))
-		  ("x" (find-file "/sudo::/etc/nixos/configuration.nix"))
-		  ("o" (browse-url "https://search.nixos.org/packages"))
+		         ("x" (find-file "/sudo::/etc/nixos/configuration.nix"))
+		         ("o" (browse-url "https://search.nixos.org/packages"))))
 
 	      ("u" (kill-buffer (current-buffer)))
 	      ("m" dired-jump)
