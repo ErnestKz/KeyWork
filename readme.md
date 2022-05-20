@@ -25,8 +25,8 @@ To install the package and its dependencies via [straight.el](https://github.com
    :repo "ernestkz/KeyWork"))
 ```
 Repositories of the dependencies:
-- (ParserMonad.el)[https://github.com/ErnestKz/ParserMonad.el]
-- (monad.el)[https://github.com/ErnestKz/monad.el]
+- [ParserMonad.el](https://github.com/ErnestKz/ParserMonad.el)
+- [monad.el](https://github.com/ErnestKz/monad.el)
 
 ## Example
 Below is an excerpt from a [config](https://github.com/ErnestKz/SystemConfig/blob/e27372d722e99aa12465ed37f0b02038c63d2d0d/Emacs/.emacs#L418) which utilises KeyWork to a great extent.
