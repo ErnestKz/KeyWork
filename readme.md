@@ -1,6 +1,7 @@
 # KeyWork 🗝️👷🏼‍♂️
 
 ## Installation
+To install the packages via [straight](https://github.com/radian-software/straight.el):
 ```
 (use-package monad
   :straight
