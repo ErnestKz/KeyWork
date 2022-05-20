@@ -1,3 +1,5 @@
+# KeyWork 🗝️👷🏼‍♂️
+
 ## Installation
 ```
 (use-package monad
@@ -62,21 +64,28 @@
  ("<f8>" !KW-command)
  
  ("SPC" :(("i" :(("e" find-file)))
-	  ("," :(("m" eval-last-sexp)))
+	      ("," :(("m" eval-last-sexp)))
 	  
-	  ("j" :(("j" helpful-function)
-		 ("k" helpful-key)
-		 ("l" helpful-variable)))
+	      ("j" :(("j" helpful-function)
+		         ("k" helpful-key)
+		         ("l" helpful-variable)))
 	  
-	  ("w" :(("m" (find-file "~/.emacs"))
-		 ("x" (find-file "/sudo::/etc/nixos/configuration.nix"))
-		 ("o" (browse-url "https://search.nixos.org/packages"))
+	      ("w" :(("m" (find-file "~/.emacs"))
+		  ("x" (find-file "/sudo::/etc/nixos/configuration.nix"))
+		  ("o" (browse-url "https://search.nixos.org/packages"))
 
-	  ("u" (kill-buffer (current-buffer)))
-	  ("m" dired-jump)
-	  (";" save-buffer)
-	  ("f" switch-to-buffer)
-	  ("4" split-window-horizontally)
-	  ("3" delete-window))))
+	      ("u" (kill-buffer (current-buffer)))
+	      ("m" dired-jump)
+	      (";" save-buffer)
+	      ("f" switch-to-buffer)
+	      ("4" split-window-horizontally)
+	      ("3" delete-window))))
+	  
+	  
+(setq KeyWork-mode t)
+(KeyWork-on 'navigation-map)
+(add-hook 'minibuffer-setup-hook (lambda () (KeyWork-on 'KW-command)))
+(add-hook 'minibuffer-exit-hook (lambda () (KeyWork-on 'KW-insert)))
+	  
 ```
 
