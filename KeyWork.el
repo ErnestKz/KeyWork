@@ -1,4 +1,5 @@
-;;; KeyWork.el --- A modal keybinding DSL. -*- lexical-binding: t -*-
+;;; -*- lexical-binding: t -*-
+;;; KeyWork.el --- 🗝️👷🏼‍♂️ - Elisp DSL for declaring modal bindings in Emacs. 
 
 ;; Copyright (C) 2021  Ernests Kuznecovs
 
@@ -21,14 +22,10 @@
 
 ;;; Commentary:
 
+;;; 🗝️👷🏼‍♂️ - Elisp DSL for declaring modal bindings in Emacs.
+
 ;;; Code:
 (require 'ParserMonad)
-;; (use-package ParserMonad
-;;   :straight
-;;   (ParserMonad
-;;    :type git
-;;    :host github
-;;    :repo "ernestkz/ParserMonad.el"))
 
 (defvar KeyWork--map (make-sparse-keymap)
   "Initial map of KeyWork.")
@@ -103,9 +100,6 @@
 
 ;; --------
 ;; Parsing.
-
-
-
 
 (defun KeyWork--P-symbol-prefix (prefix)
   "Docstring goes here"
