@@ -26,10 +26,11 @@ To install the packages via [straight](https://github.com/radian-software/straig
 ```
 
 ## Example
+Below is an excerpt from a [config](https://github.com/ErnestKz/SystemConfig/blob/e27372d722e99aa12465ed37f0b02038c63d2d0d/Emacs/.emacs#L418) which utilises KeyWork to a great extent.
 ```
 (KeyWork
- KW-command
- "#ffffff" hollow
+ KW-command           ;; here we give the map the name "KW-command"
+ "#ffffff" hollow     ;; here we declare cursor/point style when this map is active
  ("i" previous-line)
  ("k" next-line)
  ("l" forward-char)
@@ -47,6 +48,8 @@ To install the packages via [straight](https://github.com/radian-software/straig
  ("x" cut)
  
  ("v" (if (eq last-command 'yank) (yank-pop) (yank)))
+ ;; this is implicilty turned into a lambda
+ 
  ("y" undo)
 
  ("3" delete-other-windows)
@@ -56,17 +59,42 @@ To install the packages via [straight](https://github.com/radian-software/straig
  ("m" comint-previous-input)
  ("." comint-next-input)
  ("a" execute-extended-command)
+ 
+ ("<f8>" !KW-command)
+ ;; a symbol prefixed with "!" denotes
+ ;; a keymap/mode to be activated upon button press
 
- ("f" !(KW-insert
+ ("f" !(KW-insert     
 	"#fff000" hollow
 	("C-<tab>" completion-at-point)
 	("<f8>" !KW-command)))
+ ;; here, another map is declared, but this time in-line
+ ;; "f" will activate the KW-insert map when pressed
 
- ("<f8>" !KW-command)
+
+
+ ("s" !(prog-map
+        "#fff000" hollow
+		("<f8>" !KW-command)
+		((string-equal major-mode "pdf-view-mode") pdf-map)
+		((string-equal major-mode "python-mode") KW-python)
+		((string-equal major-mode "org-mode") KW-org)))
+;; the three lines above list predicates:
+;; e.g (string-equal major-mode "org-mode") 
+;; these predicates are checked upon "prog-map" activation
+;; and the the first to return true will activate the 
+;; corresponding map: 
+;; e.g KW-org (definition of KW-org is omitted in the readme, but can be 
+;; found in the config linked above)
+
+
+ ;; below, we define "SPC" to be a leader key, denoted by ":",
+ ;; then, for example, we further define "j" to be a leader key,
+ ;; and finally, bind commands to "j", "k", and "l".
  
  ("SPC" :(("i" :(("e" find-file)))
 	      ("," :(("m" eval-last-sexp)))
-	  
+		  
 	      ("j" :(("j" helpful-function)
 		         ("k" helpful-key)
 		         ("l" helpful-variable)))
@@ -82,10 +110,11 @@ To install the packages via [straight](https://github.com/radian-software/straig
 	      ("4" split-window-horizontally)
 	      ("3" delete-window))))
 	  
-	  
 (setq KeyWork-mode t)
 (KeyWork-on 'KW-command)
+
 (add-hook 'minibuffer-setup-hook (lambda () (KeyWork-on 'KW-insert)))
 (add-hook 'minibuffer-exit-hook (lambda () (KeyWork-on 'KW-command)))
+;; nicer to have insert mode already active when entering the minibuffer
 ```
 
