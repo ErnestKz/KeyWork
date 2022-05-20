@@ -1,7 +1,7 @@
 # KeyWork 🗝️👷🏼‍♂️
 
 ## Installation
-To install the packages via [straight](https://github.com/radian-software/straight.el):
+To install the package and its dependencies via [straight.el](https://github.com/radian-software/straight.el):
 ```
 (use-package monad
   :straight
@@ -24,6 +24,9 @@ To install the packages via [straight](https://github.com/radian-software/straig
    :host github
    :repo "ernestkz/KeyWork"))
 ```
+Repositories of the dependencies:
+- (ParserMonad.el)[https://github.com/ErnestKz/ParserMonad.el]
+- (monad.el)[https://github.com/ErnestKz/monad.el]
 
 ## Example
 Below is an excerpt from a [config](https://github.com/ErnestKz/SystemConfig/blob/e27372d722e99aa12465ed37f0b02038c63d2d0d/Emacs/.emacs#L418) which utilises KeyWork to a great extent.
@@ -51,7 +54,6 @@ Below is an excerpt from a [config](https://github.com/ErnestKz/SystemConfig/blo
  ;; this is implicilty turned into a lambda
  
  ("y" undo)
-
  ("3" delete-other-windows)
  ("4" split-window-vertically)
  ("," other-window)
@@ -71,8 +73,6 @@ Below is an excerpt from a [config](https://github.com/ErnestKz/SystemConfig/blo
  ;; here, another map is declared, but this time in-line
  ;; "f" will activate the KW-insert map when pressed
 
-
-
  ("s" !(prog-map
         "#fff000" hollow
 		("<f8>" !KW-command)
@@ -86,7 +86,6 @@ Below is an excerpt from a [config](https://github.com/ErnestKz/SystemConfig/blo
 ;; corresponding map: 
 ;; e.g KW-org (definition of KW-org is omitted in the readme, but can be 
 ;; found in the config linked above)
-
 
  ;; below, we define "SPC" to be a leader key, denoted by ":",
  ;; then, for example, we further define "j" to be a leader key,
