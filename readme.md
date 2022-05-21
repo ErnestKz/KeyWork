@@ -4,7 +4,7 @@
 2. [Commentary on Implementation](#2-commentary-on-implementation)
 3. [Commentary on Usage](#3-commentary-on-usage)
 4. [Installation](#4-installation)
-5. [Example](#5-example)
+5. [Examples](#5-examples)
 
 ## 1. Motivation
 This package is aimed at **being able to specify arbitrary keymap modes along with arbitrary key sequence setups from scratch as concisely as possible**.
