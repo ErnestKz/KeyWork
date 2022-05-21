@@ -67,8 +67,9 @@ Repositories of the dependencies:
 - [ParserMonad.el](https://github.com/ErnestKz/ParserMonad.el)
 - [monad.el](https://github.com/ErnestKz/monad.el)
 
-## 5. Example
-Below is an excerpt from a [config](https://github.com/ErnestKz/SystemConfig/blob/e27372d722e99aa12465ed37f0b02038c63d2d0d/Emacs/.emacs#L418) which utilises KeyWork to a great extent.
+## 5. Examples
+
+1. Below is an excerpt from a [config](https://github.com/ErnestKz/SystemConfig/blob/e27372d722e99aa12465ed37f0b02038c63d2d0d/Emacs/.emacs#L418) which utilises KeyWork to a great extent.
 ```
 (KeyWork
  KW-command           ;; here we give the map the name "KW-command"
@@ -154,4 +155,27 @@ Below is an excerpt from a [config](https://github.com/ErnestKz/SystemConfig/blo
 (add-hook 'minibuffer-setup-hook (lambda () (KeyWork-on 'KW-insert)))
 (add-hook 'minibuffer-exit-hook (lambda () (KeyWork-on 'KW-command)))
 ;; nicer to have insert mode already active when entering the minibuffer
+```
+
+2. Maps can be combined as if they were defined in the one place:
+```
+(KeyWork
+ DeleteVerb
+ ("d" :(("w" kill-word)
+    	("b" backward-kill-word)
+    	("$" kill-line))))
+
+(KeyWork
+ MoveVerb
+ ("m" :(("w" forward-word)
+    	("b" backward-word)
+    	("$" end-of-line))))
+
+(KeyWork
+ CommandMode
+ "#ffffff" hollow
+ (DeleteVerb MoveVerb)  ;; syntax to combine maps
+ ("<f8>" !KW-command))
+
+(KeyWork-on 'CommandMode))
 ```
