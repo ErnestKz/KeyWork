@@ -1,5 +1,38 @@
 # KeyWork 🗝️👷🏼‍♂️
 
+## Motivation
+This package is aimed at **being able to specify arbitrary keymap modes along with arbitrary key sequence setups from scratch as concisely as possible**.
+
+My reasons for a modal, key sequence, oriented bindings DSL:
+- Reduce wrist and hand strain from the vigorous key-chording I used to do.
+- Have major/minor mode specific bindings closer to the home row, for speed and ease.
+- Be able to rapidly iterate over my keyboard config to see what feels good.
+- Reduce the friction of me trying to specialise the bindings of a new major/mode.
+
+I initially was using [xah-fly-keys](https://github.com/xahlee/xah-fly-keys), which was nice as it felt quite efficient, though I began theory-crafting even more ways of making efficient interfaces and got very creative, and wanted a way to express it, xah-fly-keys was a not very suitable to build off of, as it had baked in the "command-mode" modal mechanism. Though my visions were of arbitrary amount of modes, and modes that merge together based on the environment.
+
+## Commentary on Implementation
+I started writing this the summer of 2021, and was finding it difficult and complex to parse the symbols of the language, but then I encountered [monadic parsers](https://github.com/ErnestKz/ParserMonad.el), which made it much easier.
+
+The actual implementation of mode switching is only 60 lines in total (including whitespace and comments), it's done by having a single minor mode map "KeyWork", and just replacing the minor mode map that's held within the KeyWork-map symbol with the one you want activated. The rest of the code is parsing and expanding the macros.
+
+## Commentary on Usage
+Towards the end of the summer I got it to a personally usable state, and was using throughout the subsequent college terms to great effect.
+
+The main modes that I ended up creating and using in KeyWork the most were:
+
+- A command mode ([code](https://github.com/ErnestKz/SystemConfig/blob/e27372d722e99aa12465ed37f0b02038c63d2d0d/Emacs/.emacs#L418), (my F8 keys is bound to CapsLock)), where all the keys close to the home row are responsible for moving around text, cutting, yanking, marking, inserting comments, undoing, etc. And the space key is a leader key for various key sequences. This command mode is heavy influenced by the command mode of xah-fly-keys.
+
+- A scroll mode ([code](https://github.com/ErnestKz/SystemConfig/blob/e27372d722e99aa12465ed37f0b02038c63d2d0d/Emacs/.emacs#L483)), which is activated from the command mode with "d", and I mostly used for smoothly scrolling the buffer either rapidly, or slowly, with (j,k), and (u,i).
+
+- An insert mode ([code](https://github.com/ErnestKz/SystemConfig/blob/e27372d722e99aa12465ed37f0b02038c63d2d0d/Emacs/.emacs#L469)), for inserting text.
+
+- An org programming mode ([code](https://github.com/ErnestKz/SystemConfig/blob/e27372d722e99aa12465ed37f0b02038c63d2d0d/Emacs/.emacs#L599)), which is [activated](https://github.com/ErnestKz/SystemConfig/blob/e27372d722e99aa12465ed37f0b02038c63d2d0d/Emacs/.emacs#L474) from the command mode with "s". I used this mode when programming python within emacs-jupyter . I setup the mode to be able to navigate between org source blocks, expand/collapse them, execute them, move them up or down, create new source blocks, hide/show results, and some more, and almost all of these commands using the high value home-row and surrounding keys without needing to press leader keys or chords.
+
+During the year I was switching between the web-based colab (for group projects and gpu usage) and my specialised org setup, I noticed when I eventually would come back to org, the process of experimenting bits of code in isolated source blocks (quite a core part of workflow) was much smoother and I would:
+- do it more often, due to the reduced friction of not needing to stretch my hands to move mouse or press key chords. 
+- and faster; efficient keys placement, creating blocks, cutting, pasting, executing, deleting blocks with minimum keystrokes
+
 ## Installation
 To install the package and its dependencies via [straight.el](https://github.com/radian-software/straight.el):
 ```
@@ -116,4 +149,3 @@ Below is an excerpt from a [config](https://github.com/ErnestKz/SystemConfig/blo
 (add-hook 'minibuffer-exit-hook (lambda () (KeyWork-on 'KW-command)))
 ;; nicer to have insert mode already active when entering the minibuffer
 ```
-
