@@ -1,10 +1,10 @@
 # KeyWork 🗝️👷🏼‍♂️
 ### Table of Contents
-1. [Motivation](#motivation)
-2. [Commentary on Implementation](#commentary-on-implementation)
-3. [Commentary on Usage](#commentary-on-usage)
-4. [Installation](#installation)
-5. [Example](#example)
+1. [Motivation](#1motivation)
+2. [Commentary on Implementation](#2commentary-on-implementation)
+3. [Commentary on Usage](#3commentary-on-usage)
+4. [Installation](#4installation)
+5. [Example](#5example)
 
 ## 1. Motivation
 This package is aimed at **being able to specify arbitrary keymap modes along with arbitrary key sequence setups from scratch as concisely as possible**.
