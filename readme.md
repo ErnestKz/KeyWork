@@ -1,6 +1,12 @@
 # KeyWork 🗝️👷🏼‍♂️
+### Table of Contents
+1. [Motivation](#motivation)
+2. [Commentary on Implementation](#commentary-on-implementation)
+3. [Commentary on Usage](#commentary-on-usage)
+4. [Installation](#installation)
+5. [Example](#example)
 
-## Motivation
+## 1. Motivation
 This package is aimed at **being able to specify arbitrary keymap modes along with arbitrary key sequence setups from scratch as concisely as possible**.
 
 My reasons for a modal, key sequence, oriented bindings DSL:
@@ -11,12 +17,12 @@ My reasons for a modal, key sequence, oriented bindings DSL:
 
 I initially was using [xah-fly-keys](https://github.com/xahlee/xah-fly-keys), which was nice as it felt quite efficient, though I began theory-crafting even more ways of making efficient interfaces and got very creative, and wanted a way to express it, xah-fly-keys was a not very suitable to build off of, as it had baked in the "command-mode" modal mechanism. Though my visions were of arbitrary amount of modes, and modes that merge together based on the environment.
 
-## Commentary on Implementation
+## 2. Commentary on Implementation
 I started writing this the summer of 2021, and was finding it difficult and complex to parse the symbols of the language, but then I encountered [monadic parsers](https://github.com/ErnestKz/ParserMonad.el), which made it much easier.
 
 The actual implementation of mode switching is only 60 lines in total (including whitespace and comments), it's done by having a single minor mode map "KeyWork", and just replacing the minor mode map that's held within the KeyWork-map symbol with the one you want activated. The rest of the code is parsing and expanding the macros.
 
-## Commentary on Usage
+## 3. Commentary on Usage
 Towards the end of the summer I got it to a personally usable state, and was using throughout the subsequent college terms to great effect.
 
 The main modes that I ended up creating and using in KeyWork the most were:
@@ -33,7 +39,7 @@ During the year I was switching between the web-based colab (for group projects 
 - do it more often, due to the reduced friction of not needing to stretch my hands to move mouse or press key chords. 
 - and faster; efficient keys placement, creating blocks, cutting, pasting, executing, deleting blocks with minimum keystrokes
 
-## Installation
+## 4. Installation
 To install the package and its dependencies via [straight.el](https://github.com/radian-software/straight.el):
 ```
 (use-package monad
@@ -61,7 +67,7 @@ Repositories of the dependencies:
 - [ParserMonad.el](https://github.com/ErnestKz/ParserMonad.el)
 - [monad.el](https://github.com/ErnestKz/monad.el)
 
-## Example
+## 5. Example
 Below is an excerpt from a [config](https://github.com/ErnestKz/SystemConfig/blob/e27372d722e99aa12465ed37f0b02038c63d2d0d/Emacs/.emacs#L418) which utilises KeyWork to a great extent.
 ```
 (KeyWork
