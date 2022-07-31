@@ -37,6 +37,18 @@
   :keymap KeyWork--map
   :group 'KeyWork)
 
+
+(defun KeyWork--priority-minor-mode-map (_file)
+  "Try to ensure that keybindings retain priority over other minor modes.
+
+Called via the `after-load-functions' special hook."
+  (unless (eq (caar minor-mode-map-alist) 'KeyWork-mode)
+    (let ((mykeys (assq 'KeyWork-mode minor-mode-map-alist)))
+      (assq-delete-all 'KeyWork-mode minor-mode-map-alist)
+      (add-to-list 'minor-mode-map-alist mykeys))))
+
+(add-hook 'after-load-functions 'KeyWork--priority-minor-mode-map)
+
 ;; --------------------------
 ;; KeyWork symbol generation.
 
@@ -46,7 +58,7 @@
 (defun KeyWork--gensymbol ()
   "Generate a symbol."
   (setq KeyWork--gensymbol-count (1+ KeyWork--gensymbol-count))
-  (intern (concat "KeyWork--"(number-to-string KeyWork--gensymbol-count))))
+  (intern (concat "KeyWork--" (number-to-string KeyWork--gensymbol-count))))
 
 (defun KeyWork--genmap ()
   "Generate a symbol and assign it an empty keymap."
