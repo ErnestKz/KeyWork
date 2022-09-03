@@ -128,6 +128,45 @@ Map merging and not using macros allows for modular declaration of keymaps.
     ("g" avy-goto-word-0)
     ("G" avy-goto-line)
     )))
+	
+	
+(setq
+ kw-lsp
+ (keywork--make-map
+  :pred (lambda () (bound-and-true-p lsp-mode))
+  :map
+  `(("m" ,(kw-m `(("i" imenu)	
+                  ("I" lsp-ui-imenu)
+		  
+		  
+		          ("r" lsp-rename)
+		          ("1" lsp-document-highlight)
+		          ("l" lsp-lens-mode)
+        
+        		  					
+        		  
+        		  ("k" ,(kw-c (lsp-avy-lens)
+        			           (lsp-lens-refresh t)))
+        
+        		  ("3" lsp-format-buffer)
+        		  
+        		  
+        		  ("s" lsp-ido-workspace-symbol)
+        		  
+        		  ("a" lsp-execute-code-action)
+        		  
+        		  ("D" lsp-describe-thing-at-point)
+        		  ("d" lsp-ui-doc-glance)
+        		  
+        		  ("b" lsp-headerline-breadcrumb-mode)
+        		  ("v" lsp-modeline-code-actions-mode)
+        		  
+        		  ("f" lsp-ui-peek-find-references)
+        		  ("F" lsp-find-references)
+        		  
+        		  ("t" lsp-treemacs-call-hierarchy)))))))
+
+(keywork--add-child 'kw-command 'kw-lsp)
 
 (keywork-mode)
 (funcall (kw-on 'kw-command))
