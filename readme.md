@@ -1,4 +1,144 @@
-# KeyWork 🗝️👷🏼‍♂️
+# New keywork version.
+A new keywork implementation has been written keywork.el as opposed to the old KeyWork.el. The new implementation does not require any third party dependencies and also is not as ambitious with a custom syntax.
+
+New keywork also has the ability to merge maps such that even keysequences are merged.
+
+# keywork (new)
+## Example
+```
+(setq
+ kw-insert
+ (keywork--make-map
+  :color "#008888"
+  :map
+  `(("<f8>" ,(kw-on 'kw-command)))))
+
+(setq
+ kw-command
+ (keywork--make-map
+  :map
+  `(("a" execute-extended-command)
+    ("q" minions-mode))))
+
+(keywork--add-child 'kw-command 'kw-command-mode-select)
+(keywork--add-child 'kw-command 'kw-command-window)
+(keywork--add-child 'kw-command 'kw-command-files-and-buffers)
+(keywork--add-child 'kw-command 'kw-command-file-jump-shortcuts)
+(keywork--add-child 'kw-command 'kw-command-elisp)
+
+
+(setq
+ kw-command-mode-select
+ (keywork--make-map
+  :map
+  `(("<f8>" ,(kw-on 'kw-command))
+    ("f"    ,(kw-on 'kw-insert))
+    ("d"    ,(kw-on 'kw-scroll)))))
+
+(setq
+ kw-command-window
+ (keywork--make-map
+  :map
+  `(("SPC 3" delete-window)
+    ("4" split-window-vertically)
+    ("," other-window)
+    ("SPC 4" split-window-horizontally)
+    ("4" split-window-vertically)
+    ("3" delete-other-windows))))
+
+(setq
+ kw-command-files-and-buffers
+ (keywork--make-map
+  :map
+  `(("SPC i e" find-file)
+    ("SPC i d" dired)
+    ("SPC u" ,(kw-c (kill-buffer (current-buffer))))
+    ("SPC m" dired-jump)
+    ("SPC n" ek-kill-jump)
+    ("SPC ;" save-buffer)
+    ("SPC f" switch-to-buffer))))
+
+(setq
+ kw-command-elisp
+ (keywork--make-map
+  :map
+  `(("SPC e j" eval-last-sexp)
+    ("SPC e b" eval-buffer)
+    ("SPC e m" pp-macroexpand-last-sexp)
+    ("SPC j"   help)
+    ("SPC J f" describe-function)
+    ("SPC J v" describe-variable))))
+
+(setq
+ kw-shortcuts
+ (keywork--make-map
+  :map
+  `(("n" minmacs-find-source)
+    ("k" ,(kw-c (find-file
+		 (concat minmacs-source-directory
+			 "minmacs-keybindings.el"))))
+    ("x" ,(kw-c (find-file (concat system-nix-directory "system.nix"))))
+    ("h" ,(kw-c (ek-find-file-default system-nix-directory)))
+    ("f" ,(kw-c (ek-find-file-default system-haskell-directory)))
+    ("u" ,(kw-c (ek-find-file-default system-desktop-ui-directory)))
+    ("m" ,(kw-c (find-file system-xmonad-config-file)))
+    ("s" ek-nixos-rebuild-switch)
+    ("o" ,(kw-c (ek-browse-url-chromium "https://search.nixos.org/packages")))
+    ("j" ek-message-buffer)
+    ("p" ek-visit-straight-package))))
+
+(setq
+ kw-command-file-jump-shortcuts
+ (keywork--make-map
+  :map
+  `(("SPC w" ,(kw-seq 'kw-shortcuts)))))
+
+(setq
+ kw-scroll
+ (keywork--make-map
+  :color "#bb8833"
+  :map
+  `(("<f8>" ,(kw-on 'kw-command))
+    ("f"    ,(kw-on 'kw-insert))
+    ("q"    minions-mode)
+    
+    ("u" ,(kw-c (ek-scroll-preserve-position t)))
+    ("i" ,(kw-c (ek-scroll-preserve-position nil)))
+    ("j" ,(kw-c (scroll-up-command 4)))
+    ("k" ,(kw-c (scroll-down-command 4)))
+    
+    ("M-i" ,(kw-c (previous-line 8)))
+    ("M-k" ,(kw-c (next-line 8)))
+    ("M-u" ,(kw-c (previous-line 3)))
+    ("M-j" ,(kw-c (next-line 3)))
+    ("M-d" recenter-top-bottom)
+    
+    ("d" move-to-window-line)
+    ("m" end-of-buffer)
+    ("," beginning-of-buffer)
+
+    ("t" set-mark-command)
+    ("x" ek-cut)
+    ("c" kill-ring-save)
+    ("v" ek-paste)
+
+
+    ("g" avy-goto-word-0)
+    ("G" avy-goto-line)
+    )))
+
+(keywork-mode)
+(funcall (kw-on 'kw-command))
+(add-hook 'minibuffer-setup-hook (kw-on 'kw-insert))
+(add-hook 'minibuffer-exit-hook (kw-on 'kw-command))
+(push (lambda (_) (keywork-refresh)) window-selection-change-functions)
+(push (lambda (_) (keywork-refresh)) window-buffer-change-functions)
+
+```
+
+
+# KeyWork 🗝️👷🏼‍♂️ (old)
+
 ### Table of Contents
 1. [Motivation](#1-motivation)
 2. [Commentary on Implementation](#2-commentary-on-implementation)
