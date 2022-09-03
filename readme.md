@@ -1,7 +1,9 @@
 # New keywork version.
-A new keywork implementation has been written keywork.el as opposed to the old KeyWork.el. The new implementation does not require any third party dependencies and also is not as ambitious with a custom syntax.
+A new keywork implementation has been written, keywork.el, as opposed to the old KeyWork.el. The new implementation does not require any third party dependencies and also is not as ambitious with a custom syntax macro and mostly uses regular functions instead.
 
 New keywork also has the ability to merge maps such that even keysequences are merged.
+
+Map merging and not using macros allows for modular declaration of keymaps.
 
 # keywork (new)
 ## Example
