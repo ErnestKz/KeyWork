@@ -30,9 +30,6 @@ Called via the `after-load-functions' special hook."
     (setf (cdr (assq 'keywork-mode minor-mode-map-alist))
 	  map)))
 
-(cl-defstruct map-ref
-  (sym :type symbol))
-
 (cl-defstruct map
   (binds nil)
   (pred nil :type function)
